@@ -143,8 +143,9 @@ small {
 }
 .foto-item img {
   width:100%;
-  height:140px;
-  object-fit:cover;
+  height:220px;
+  object-fit:contain;
+  background:#f8fafc;
   border-radius:5px;
 }
 .foto-item strong {
@@ -154,9 +155,10 @@ small {
   margin-bottom:7px;
 }
 .preview img {
-  width:100px;
-  height:75px;
-  object-fit:cover;
+  width:160px;
+  height:120px;
+  object-fit:contain;
+  background:#f8fafc;
   border-radius:6px;
   margin-top:7px;
 }
@@ -253,7 +255,7 @@ footer {
 
 @page {
   size:A4;
-  margin:14mm 13mm 16mm;
+  margin:11mm 13mm 11mm;
 }
 
 @media print {
@@ -261,12 +263,12 @@ footer {
   body > header, body > main, body > .print-footer, body > footer {display:none !important}
   #reporteImpresion {display:block !important}
   #reporteImpresion * {box-sizing:border-box}
-  .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:12px;margin-bottom:16px}
+  .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:9px;margin-bottom:11px}
   .rep-brand {font-size:21px;font-weight:800;letter-spacing:1px;color:#17365d}
   .rep-brand small {display:block;font-size:9px;letter-spacing:0;color:#52657b;font-weight:normal;margin-top:4px}
   .rep-title {text-align:right;color:#17365d;font-size:17px;font-weight:bold}
   .rep-subtitle {font-size:9px;color:#52657b;margin-top:4px}
-  .rep-section {margin:15px 0;break-inside:avoid}
+  .rep-section {margin:10px 0;break-inside:avoid}
   .rep-section h2 {font-size:12px;color:#17365d;border-bottom:1px solid #9aabba;padding:0 0 6px;margin:0 0 9px}
   .rep-data {display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .rep-field {padding:5px 0;border-bottom:1px solid #e2e7ed}
@@ -276,18 +278,18 @@ footer {
   .rep-table th,.rep-table td {border:1px solid #cbd5df;padding:7px 6px;vertical-align:top}
   .rep-detail {font-size:9px;line-height:1.45;color:#334155;white-space:normal;overflow-wrap:anywhere}
   .rep-table td {overflow-wrap:anywhere}
-  .rep-photo img {max-height:145px}
-  .rep-photo-row td {padding:8px 6px;background:#fbfcfe}
-  .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
-  .rep-photo {border:1px solid #cbd5df;border-radius:5px;padding:6px;text-align:center;break-inside:avoid}
-  .rep-photo b {display:block;font-size:9px;color:#17365d;margin-bottom:5px}
-  .rep-photo img {display:block;width:100%;height:145px;object-fit:contain;background:#fff}
+  .rep-photo img {max-height:320px}
+  .rep-photo-row td {padding:12px 8px;background:#fbfcfe}
+  .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .rep-photo {border:1px solid #cbd5df;border-radius:6px;padding:8px;text-align:center;break-inside:avoid}
+  .rep-photo b {display:block;font-size:10px;color:#17365d;margin-bottom:7px}
+  .rep-photo img {display:block;width:100%;height:320px;max-height:320px;object-fit:contain;background:#fff}
   .rep-total {margin-top:12px;padding:10px 12px;background:#eef3f8;border-left:4px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:14px}
-  .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:30px;break-inside:avoid}
+  .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;break-inside:avoid}
   .rep-sign {text-align:center;min-width:0}
   .rep-sign img {width:100%;height:54px;object-fit:contain;display:block;margin:0 auto 5px}
   .rep-sign .rep-line {border-top:1px solid #52657b;margin-top:4px;padding-top:5px;font-size:9px;min-height:25px}
-  .rep-note {font-size:9px;color:#64748b;text-align:center;margin-top:16px}
+  .rep-note {font-size:8px;color:#64748b;text-align:center;margin-top:7px;break-inside:avoid;page-break-inside:avoid}
   .rep-empty {color:#64748b;font-style:italic}
 }
 </style>
@@ -621,24 +623,67 @@ leerFoto("fotoFin","previewFin");
 
 /* GPS */
 
+function limpiarDireccion(valor) {
+  return (valor || "").toString().trim();
+}
+
+function construirDireccionOSM(a) {
+  const via=limpiarDireccion(a.road || a.pedestrian || a.residential || a.path);
+  const numero=limpiarDireccion(a.house_number);
+  const barrio=limpiarDireccion(a.neighbourhood || a.suburb || a.quarter || a.city_district);
+  const distrito=limpiarDireccion(a.city_district || a.suburb || a.town || a.city || a.village || a.municipality);
+  const provincia=limpiarDireccion(a.county || a.state_district || a.state);
+  const departamento=limpiarDireccion(a.state);
+  const pais=limpiarDireccion(a.country);
+  const partes=[];
+  if(via) partes.push(numero ? via+", N° "+numero : via);
+  else if(numero) partes.push("N° "+numero);
+  [barrio,distrito,provincia,departamento,pais].forEach(v=>{
+    if(v && !partes.some(x=>x.toLowerCase()===v.toLowerCase())) partes.push(v);
+  });
+  return partes.filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+}
+
 async function obtenerDireccionDesdeGPS(lat,lon,campoDireccion,estado) {
-  $(estado).textContent="Coordenadas capturadas. Buscando dirección...";
+  $(estado).textContent="GPS capturado. Buscando calle, jirón y número de puerta...";
   try {
-    const url="https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+
-      encodeURIComponent(lat)+"&longitude="+encodeURIComponent(lon)+"&localityLanguage=es";
+    // OpenStreetMap puede devolver nombre de vía y número de inmueble cuando
+    // esos datos existen en su cartografía. No todos los predios tienen número registrado.
+    const url="https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat="+
+      encodeURIComponent(lat)+"&lon="+encodeURIComponent(lon)+"&accept-language=es";
     const respuesta=await fetch(url,{headers:{"Accept":"application/json"}});
-    if(!respuesta.ok) throw new Error("No se pudo consultar el servicio de direcciones");
+    if(!respuesta.ok) throw new Error("No se pudo consultar OpenStreetMap");
     const d=await respuesta.json();
-    const partes=[d.street,d.locality,d.city,d.principalSubdivision,d.countryName].filter(Boolean);
-    const direccion=partes.filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+    const direccion=construirDireccionOSM(d.address || {});
     if(direccion) {
       $(campoDireccion).value=direccion;
-      $(estado).textContent="Dirección obtenida automáticamente. Puedes corregirla manualmente.";
-    } else {
-      $(estado).textContent="No se encontró una dirección exacta. Puedes escribirla manualmente.";
+      const tieneNumero=!!(d.address && d.address.house_number);
+      $(estado).textContent=tieneNumero
+        ? "Dirección encontrada con número de inmueble. Revísala; puedes corregirla manualmente."
+        : "Se encontró la vía y zona, pero el mapa no tiene registrado el número de puerta. Puedes completarlo manualmente.";
+      return;
     }
+    throw new Error("La cartografía no devolvió una dirección detallada");
   } catch(error) {
-    $(estado).textContent="GPS guardado; no se pudo consultar la dirección. Puedes escribirla manualmente.";
+    // Respaldo del servicio anterior: normalmente identifica localidad y distrito,
+    // aunque no siempre proporciona calle o número.
+    try {
+      const respaldo="https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+
+        encodeURIComponent(lat)+"&longitude="+encodeURIComponent(lon)+"&localityLanguage=es";
+      const r=await fetch(respaldo,{headers:{"Accept":"application/json"}});
+      if(!r.ok) throw new Error("Sin respuesta del servicio alternativo");
+      const d=await r.json();
+      const partes=[d.street,d.locality,d.city,d.principalSubdivision,d.countryName].filter(Boolean);
+      const direccion=partes.filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+      if(direccion) {
+        $(campoDireccion).value=direccion;
+        $(estado).textContent="Dirección aproximada obtenida. El número de puerta puede no estar disponible; revísala manualmente.";
+      } else {
+        $(estado).textContent="GPS guardado, pero no se encontró una dirección. Puedes escribirla manualmente.";
+      }
+    } catch(e) {
+      $(estado).textContent="GPS guardado; no se pudo consultar la dirección. Puedes escribirla manualmente.";
+    }
   }
 }
 
