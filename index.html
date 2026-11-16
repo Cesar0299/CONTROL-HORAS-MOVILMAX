@@ -676,6 +676,37 @@ async function cargarDatos() {
 
 /* FOTOGRAFÍAS */
 
+// Lee la fotografía seleccionada y la comprime antes de guardarla.
+function comprimirImagenArchivo(archivo,max=1280,calidad=0.65) {
+  return new Promise((resolve,reject)=>{
+    if(!archivo){resolve("");return;}
+    if(!archivo.type || !archivo.type.startsWith("image/")) {
+      reject(new Error("El archivo seleccionado no es una imagen."));
+      return;
+    }
+    const lector=new FileReader();
+    lector.onerror=()=>reject(new Error("No se pudo leer el archivo seleccionado."));
+    lector.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("El navegador no pudo abrir esta imagen. Prueba con JPG o PNG."));
+      img.onload=()=>{
+        try {
+          const escala=Math.min(1,max/Math.max(img.width,img.height));
+          const canvas=document.createElement("canvas");
+          canvas.width=Math.max(1,Math.round(img.width*escala));
+          canvas.height=Math.max(1,Math.round(img.height*escala));
+          const contexto=canvas.getContext("2d");
+          if(!contexto) throw new Error("No se pudo procesar la imagen.");
+          contexto.drawImage(img,0,0,canvas.width,canvas.height);
+          resolve(canvas.toDataURL("image/jpeg",calidad));
+        } catch(error) { reject(error); }
+      };
+      img.src=lector.result;
+    };
+    lector.readAsDataURL(archivo);
+  });
+}
+
 function leerFoto(id,preview) {
   $(id).addEventListener("change",async e=>{
     const archivo=e.target.files[0];
