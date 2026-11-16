@@ -7,6 +7,8 @@
 <title>Control de horas extras - MOVILMAX</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -237,6 +239,7 @@ footer {
 
 @media(max-width:600px) {
   .grid {grid-template-columns:1fr}
+  input,textarea {font-size:16px}
   .ticket-fotos {grid-template-columns:1fr 1fr}
   .actions button {flex:1 1 100%}
   .signatures-row {
@@ -249,6 +252,11 @@ footer {
     flex:0 0 145px;
   }
   .card {padding:14px}
+  main {margin:12px auto;padding:0 10px 22px}
+  header {padding:16px 12px}
+  header h1 {font-size:19px}
+  .ticket {padding:11px}
+  .foto-item img {height:150px}
 }
 
 /* Reporte administrativo: solo aparece al imprimir */
@@ -293,6 +301,47 @@ footer {
   .rep-note {font-size:9px;color:#64748b;text-align:center;margin-top:16px}
   .rep-empty {color:#64748b;font-style:italic}
 }
+
+/* PDF A4 DIRECTO: no utiliza la ventana de impresión */
+#reporteImpresion.pdf-mode {
+  display:block !important;
+  position:fixed;
+  left:-12000px;
+  top:0;
+  width:794px;
+  min-height:1123px;
+  padding:34px 38px;
+  overflow:visible;
+  background:#fff;
+  color:#202b38;
+  font-family:Arial,sans-serif;
+  font-size:10px;
+}
+#reporteImpresion.pdf-mode .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:8px;margin-bottom:9px}
+#reporteImpresion.pdf-mode .rep-brand {font-size:19px;font-weight:800;letter-spacing:1px;color:#17365d}
+#reporteImpresion.pdf-mode .rep-brand small {display:block;font-size:8px;color:#52657b;font-weight:normal;margin-top:3px}
+#reporteImpresion.pdf-mode .rep-title {text-align:right;color:#17365d;font-size:14px;font-weight:bold}
+#reporteImpresion.pdf-mode .rep-subtitle {font-size:8px;color:#52657b;margin-top:3px}
+#reporteImpresion.pdf-mode .rep-section {margin:8px 0}
+#reporteImpresion.pdf-mode .rep-section h2 {font-size:10px;color:#17365d;border-bottom:1px solid #9aabba;padding:0 0 4px;margin:0 0 5px}
+#reporteImpresion.pdf-mode .rep-data {display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+#reporteImpresion.pdf-mode .rep-field {padding:3px 0;border-bottom:1px solid #e2e7ed}
+#reporteImpresion.pdf-mode .rep-field b {color:#52657b;font-size:8px;display:block;margin-bottom:2px}
+#reporteImpresion.pdf-mode .rep-table {width:100%;border-collapse:collapse;font-size:8px}
+#reporteImpresion.pdf-mode .rep-table th {background:#eaf0f6;color:#17365d;text-align:left;font-size:8px}
+#reporteImpresion.pdf-mode .rep-table th,#reporteImpresion.pdf-mode .rep-table td {border:1px solid #cbd5df;padding:4px 5px;vertical-align:top}
+#reporteImpresion.pdf-mode .rep-detail {font-size:7.5px;line-height:1.25;color:#334155;overflow-wrap:anywhere}
+#reporteImpresion.pdf-mode .rep-photo-row td {padding:5px;background:#fbfcfe}
+#reporteImpresion.pdf-mode .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+#reporteImpresion.pdf-mode .rep-photo {border:1px solid #cbd5df;border-radius:5px;padding:4px;text-align:center}
+#reporteImpresion.pdf-mode .rep-photo b {display:block;font-size:8px;color:#17365d;margin-bottom:3px}
+#reporteImpresion.pdf-mode .rep-photo img {display:block;width:100%;height:145px;object-fit:contain;background:#fff}
+#reporteImpresion.pdf-mode .rep-total {margin-top:6px;padding:6px 8px;background:#eef3f8;border-left:3px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:10px}
+#reporteImpresion.pdf-mode .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:10px}
+#reporteImpresion.pdf-mode .rep-sign {text-align:center;min-width:0}
+#reporteImpresion.pdf-mode .rep-sign img {width:100%;height:38px;object-fit:contain;display:block;margin:0 auto 3px}
+#reporteImpresion.pdf-mode .rep-sign .rep-line {border-top:1px solid #52657b;margin-top:3px;padding-top:3px;font-size:8px;min-height:18px}
+#reporteImpresion.pdf-mode .rep-note {font-size:7px;color:#64748b;text-align:center;margin-top:8px}
 
 /* ACCESO Y SESION */
 body:not(.autenticado) > header, body:not(.autenticado) > main, body:not(.autenticado) > footer {display:none}
@@ -497,7 +546,7 @@ body.autenticado #barraSesion {display:flex}
   <h2>5. Exportar y guardar</h2>
   <div class="actions">
     <button class="green" onclick="exportarExcel()">Exportar Excel</button>
-    <button onclick="exportarPDF()">Guardar PDF</button>
+    <button class="green" id="btnDescargarPDF" onclick="exportarPDF()">Descargar PDF</button>
     <button class="secondary" onclick="exportarRespaldo()">Respaldo JSON</button>
     <button class="danger" onclick="borrarTodo()">Borrar todos los registros</button>
   </div>
@@ -666,6 +715,16 @@ async function cargarDatos() {
         coordenadasFin:t.coordenadas_fin||"", fotoInicio:f.foto_inicio||"", fotoFin:f.foto_fin||""
       };
     });
+    // Recupera también las firmas guardadas en Storage, para que el PDF funcione
+    // aunque se abra la cuenta desde otro navegador o computadora.
+    if(filas.length) {
+      const ultimos=archivos[filas[0].id]||{};
+      const mapaFirmas={firma_tecnico:"firmaTecnico",firma_aprobador:"firmaAprobador",firma_rrhh:"firmaRRHH",firma_gerencia:"firmaGerencia"};
+      for(const [tipo,clave] of Object.entries(mapaFirmas)) {
+        if(ultimos[tipo]) firmas[clave]=ultimos[tipo];
+      }
+      restaurarFirmasCanvas();
+    }
     limpiarFormulario();
     $("tecnico").value=perfilActual.rol==="supervisor"?"":perfilActual.nombre;
     mostrarTickets();
@@ -1273,14 +1332,57 @@ function generarReporteImpresion() {
     <div class="rep-note">Documento generado para revisión, conformidad y aprobación interna · MOVILMAX</div>`;
 }
 
-function exportarPDF() {
+async function exportarPDF() {
   if (!registros.length) {
     alert("Primero registra al menos un ticket.");
     return;
   }
-  generarReporteImpresion();
-  // Usa la impresión nativa del navegador: el usuario elige Guardar como PDF.
-  setTimeout(() => window.print(), 250);
+  if(typeof html2canvas!=="function" || !window.jspdf?.jsPDF) {
+    alert("No se pudo cargar el generador PDF. Revisa tu conexión e inténtalo nuevamente.");
+    return;
+  }
+  const boton=$("btnDescargarPDF");
+  const textoOriginal=boton?.textContent||"Descargar PDF";
+  if(boton){boton.disabled=true;boton.textContent="Generando PDF...";}
+  const reporte=$("reporteImpresion");
+  const estiloAnterior={display:reporte.style.display,position:reporte.style.position,left:reporte.style.left,top:reporte.style.top,width:reporte.style.width,minHeight:reporte.style.minHeight,padding:reporte.style.padding};
+  try {
+    generarReporteImpresion();
+    reporte.classList.add("pdf-mode");
+    reporte.setAttribute("aria-hidden","false");
+    // Espera a que las fotografías privadas de Supabase terminen de cargar.
+    const imagenes=[...reporte.querySelectorAll("img")];
+    await Promise.all(imagenes.map(img=>{
+      if(img.complete && img.naturalWidth>0) return Promise.resolve();
+      return new Promise(resolve=>{
+        const fin=()=>resolve();
+        img.addEventListener("load",fin,{once:true});
+        img.addEventListener("error",fin,{once:true});
+        setTimeout(fin,10000);
+      });
+    }));
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const lienzo=await html2canvas(reporte,{scale:2,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false,windowWidth:850});
+    const imagen=lienzo.toDataURL("image/jpeg",0.92);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
+    const anchoPagina=198,altoPagina=285;
+    const proporcion=Math.min(anchoPagina/lienzo.width,altoPagina/lienzo.height);
+    const ancho=lienzo.width*proporcion,alto=lienzo.height*proporcion;
+    const x=(210-ancho)/2,y=(297-alto)/2;
+    pdf.addImage(imagen,"JPEG",x,y,ancho,alto,undefined,"FAST");
+    const ticket=registros.length===1 ? (registros[0].numero||"ticket") : "resumen_"+registros.length+"_tickets";
+    const seguro=String(ticket).replace(/[^a-z0-9_-]+/gi,"_");
+    pdf.save("MOVILMAX_"+seguro+"_"+fechaHoy()+".pdf");
+  } catch(e) {
+    console.error("Error al generar PDF:",e);
+    alert("No se pudo generar el PDF. "+(e.message||"Revisa que las fotografías se visualicen y vuelve a intentarlo."));
+  } finally {
+    reporte.classList.remove("pdf-mode");
+    reporte.setAttribute("aria-hidden","true");
+    Object.assign(reporte.style,estiloAnterior);
+    if(boton){boton.disabled=false;boton.textContent=textoOriginal;}
+  }
 }
 
 /* IMPRESIÓN */
