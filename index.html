@@ -1,0 +1,1093 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control de horas extras - MOVILMAX</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root {
+  --azul:#17365D;
+  --azul2:#24558A;
+  --fondo:#F2F5F9;
+  --borde:#D9E1EA;
+  --texto:#243447;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--fondo);
+  color:var(--texto);
+}
+header {
+  background:var(--azul);
+  color:white;
+  text-align:center;
+  padding:20px 15px;
+}
+.logo {
+  width:190px;
+  height:55px;
+  object-fit:contain;
+  margin:auto auto 8px;
+}
+header h1 {font-size:22px;margin:7px 0}
+header p {font-size:12px;margin:0;color:#dbe7f5}
+
+main {
+  max-width:950px;
+  margin:22px auto;
+  padding:0 13px 30px;
+}
+.card {
+  background:white;
+  border-radius:12px;
+  padding:19px;
+  margin-bottom:16px;
+  box-shadow:0 2px 9px #132b4410;
+}
+h2 {
+  color:var(--azul);
+  font-size:17px;
+  margin:0 0 15px;
+  padding-bottom:9px;
+  border-bottom:1px solid var(--borde);
+}
+label {
+  display:block;
+  font-size:13px;
+  font-weight:bold;
+  margin:12px 0 6px;
+}
+input,textarea {
+  width:100%;
+  padding:11px;
+  border:1px solid var(--borde);
+  border-radius:7px;
+  font-size:14px;
+  background:white;
+}
+textarea {min-height:75px;resize:vertical}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:13px;
+}
+button {
+  border:0;
+  border-radius:7px;
+  padding:11px 14px;
+  background:var(--azul2);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:13px;
+}
+button.secondary {background:#64748b}
+button.green {background:#167647}
+button.danger {background:#b42318}
+button.orange {background:#a65c0b}
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:15px;
+}
+small {
+  display:block;
+  color:#64748b;
+  font-size:11px;
+  margin-top:5px;
+}
+.total {
+  background:#eaf2fb;
+  padding:15px;
+  border-radius:9px;
+  font-size:19px;
+  font-weight:bold;
+  color:var(--azul);
+  margin-top:15px;
+}
+.ticket {
+  border:1px solid var(--borde);
+  border-radius:10px;
+  padding:15px;
+  margin:12px 0;
+  break-inside:avoid;
+}
+.ticket h3 {
+  color:var(--azul);
+  font-size:15px;
+  margin:0 0 10px;
+}
+.ticket p {
+  font-size:12px;
+  line-height:1.5;
+  margin:5px 0;
+}
+.ticket-fotos {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.foto-item {
+  border:1px solid var(--borde);
+  border-radius:8px;
+  padding:8px;
+  text-align:center;
+}
+.foto-item img {
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  border-radius:5px;
+}
+.foto-item strong {
+  display:block;
+  font-size:11px;
+  color:var(--azul);
+  margin-bottom:7px;
+}
+.preview img {
+  width:100px;
+  height:75px;
+  object-fit:cover;
+  border-radius:6px;
+  margin-top:7px;
+}
+.location-box {
+  background:#f6f8fb;
+  border:1px solid var(--borde);
+  border-radius:8px;
+  padding:12px;
+  margin-top:12px;
+}
+.location-box h3 {
+  color:var(--azul);
+  font-size:14px;
+  margin:0 0 8px;
+}
+.location-box button {margin-top:8px}
+.status {
+  color:#167647;
+  font-size:12px;
+  margin-top:5px;
+}
+.editing {
+  background:#fff4df;
+  border:1px solid #e5bd75;
+  padding:10px;
+  border-radius:7px;
+  margin-bottom:12px;
+  color:#87500a;
+  font-weight:bold;
+}
+.signatures-row {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.signature-item {
+  min-width:0;
+  text-align:center;
+  border:1px solid var(--borde);
+  border-radius:8px;
+  padding:8px 5px;
+}
+.signature-item label {
+  font-size:11px;
+  min-height:28px;
+  margin:0 0 6px;
+}
+.signature-item canvas {
+  display:block;
+  width:100%;
+  height:55px;
+  border:1px dashed #9aa9ba;
+  border-radius:5px;
+  touch-action:none;
+  background:#fff;
+}
+.signature-item button {
+  padding:6px 8px;
+  font-size:10px;
+  margin-top:6px;
+}
+.signature-print {
+  display:none;
+  width:100%;
+  height:55px;
+  object-fit:contain;
+}
+footer {
+  text-align:center;
+  padding:15px;
+  font-size:11px;
+  color:#64748b;
+}
+.print-footer {display:none}
+
+@media(max-width:600px) {
+  .grid {grid-template-columns:1fr}
+  .ticket-fotos {grid-template-columns:1fr 1fr}
+  .actions button {flex:1 1 100%}
+  .signatures-row {
+    display:flex;
+    overflow-x:auto;
+    gap:9px;
+    padding-bottom:8px;
+  }
+  .signature-item {
+    flex:0 0 145px;
+  }
+  .card {padding:14px}
+}
+
+/* Reporte administrativo: solo aparece al imprimir */
+#reporteImpresion {display:none}
+
+@page {
+  size:A4;
+  margin:14mm 13mm 16mm;
+}
+
+@media print {
+  body {background:#fff;color:#202b38;font-size:11px}
+  body > header, body > main, body > .print-footer, body > footer {display:none !important}
+  #reporteImpresion {display:block !important}
+  #reporteImpresion * {box-sizing:border-box}
+  .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:12px;margin-bottom:16px}
+  .rep-brand {font-size:21px;font-weight:800;letter-spacing:1px;color:#17365d}
+  .rep-brand small {display:block;font-size:9px;letter-spacing:0;color:#52657b;font-weight:normal;margin-top:4px}
+  .rep-title {text-align:right;color:#17365d;font-size:17px;font-weight:bold}
+  .rep-subtitle {font-size:9px;color:#52657b;margin-top:4px}
+  .rep-section {margin:15px 0;break-inside:avoid}
+  .rep-section h2 {font-size:12px;color:#17365d;border-bottom:1px solid #9aabba;padding:0 0 6px;margin:0 0 9px}
+  .rep-data {display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
+  .rep-field {padding:5px 0;border-bottom:1px solid #e2e7ed}
+  .rep-field b {color:#52657b;font-size:9px;display:block;margin-bottom:3px}
+  .rep-table {width:100%;border-collapse:collapse;font-size:10px}
+  .rep-table th {background:#eaf0f6;color:#17365d;text-align:left;font-size:9px}
+  .rep-table th,.rep-table td {border:1px solid #cbd5df;padding:7px 6px;vertical-align:top}
+  .rep-detail {font-size:9px;line-height:1.45;color:#334155}
+  .rep-photo-row td {padding:8px 6px;background:#fbfcfe}
+  .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  .rep-photo {border:1px solid #cbd5df;border-radius:5px;padding:6px;text-align:center;break-inside:avoid}
+  .rep-photo b {display:block;font-size:9px;color:#17365d;margin-bottom:5px}
+  .rep-photo img {display:block;width:100%;height:145px;object-fit:contain;background:#fff}
+  .rep-total {margin-top:12px;padding:10px 12px;background:#eef3f8;border-left:4px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:14px}
+  .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:30px;break-inside:avoid}
+  .rep-sign {text-align:center;min-width:0}
+  .rep-sign img {width:100%;height:54px;object-fit:contain;display:block;margin:0 auto 5px}
+  .rep-sign .rep-line {border-top:1px solid #52657b;margin-top:4px;padding-top:5px;font-size:9px;min-height:25px}
+  .rep-note {font-size:9px;color:#64748b;text-align:center;margin-top:16px}
+  .rep-empty {color:#64748b;font-style:italic}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <img class="logo"
+    src="https://www.movilmax.pe/wp-content/uploads/2025/01/mmx-logo-2025-blanco-300x47.png"
+    alt="MOVILMAX">
+  <h1>CONTROL DE HORAS EXTRAS</h1>
+  <p>REGISTRO DE ATENCIONES TÉCNICAS</p>
+</header>
+
+<main>
+
+<section class="card">
+  <h2>1. Datos del técnico y atención</h2>
+
+  <label>Nombre completo del técnico</label>
+  <input id="tecnico" placeholder="Ingresar nombre completo">
+
+  <div class="grid">
+    <div>
+      <label>Fecha de atención</label>
+      <input type="date" id="fecha">
+    </div>
+    <div>
+      <label>Área / servicio</label>
+      <input id="area" placeholder="Ej. Mantenimiento FTTH">
+    </div>
+  </div>
+</section>
+
+<section class="card no-print">
+  <h2>2. Registro del ticket</h2>
+
+  <div id="modoEdicion" class="editing" hidden>
+    EDITANDO TICKET. Al terminar, pulsa «Actualizar ticket».
+  </div>
+
+  <label>Número de ticket</label>
+  <input id="ticket" placeholder="Ej. INC-2026-001">
+
+  <div class="grid">
+    <div>
+      <label>Hora de inicio</label>
+      <input type="time" id="inicio">
+    </div>
+    <div>
+      <label>Hora de finalización</label>
+      <input type="time" id="fin">
+    </div>
+  </div>
+
+  <label>Descripción del trabajo realizado</label>
+  <textarea id="descripcion"
+    placeholder="Describe el trabajo realizado..."></textarea>
+
+  <div class="location-box">
+    <h3>UBICACIÓN INICIAL</h3>
+
+    <label>Dirección o lugar de inicio</label>
+    <input id="direccionInicio"
+      placeholder="Escribe la dirección inicial">
+
+    <label>Coordenadas GPS iniciales</label>
+    <input id="coordenadasInicio"
+      placeholder="Captura GPS o escribe coordenadas">
+
+    <button type="button" class="secondary"
+      onclick="capturarGPS('coordenadasInicio')">
+      Capturar GPS inicial
+    </button>
+    <div id="estadoInicio" class="status"></div>
+  </div>
+
+  <div class="location-box">
+    <h3>UBICACIÓN FINAL</h3>
+
+    <label>Dirección o lugar de finalización</label>
+    <input id="direccionFin"
+      placeholder="Escribe la dirección final">
+
+    <label>Coordenadas GPS finales</label>
+    <input id="coordenadasFin"
+      placeholder="Captura GPS o escribe coordenadas">
+
+    <button type="button" class="secondary"
+      onclick="capturarGPS('coordenadasFin')">
+      Capturar GPS final
+    </button>
+    <div id="estadoFin" class="status"></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <label>Fotografía de inicio</label>
+      <input type="file" id="fotoInicio"
+        accept="image/*" capture="environment">
+      <div id="previewInicio" class="preview"></div>
+    </div>
+    <div>
+      <label>Fotografía de finalización</label>
+      <input type="file" id="fotoFin"
+        accept="image/*" capture="environment">
+      <div id="previewFin" class="preview"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="btnAgregar" onclick="guardarTicket()">
+      + Agregar ticket
+    </button>
+    <button class="secondary" onclick="limpiarFormulario()">
+      Limpiar formulario
+    </button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>3. Tickets registrados</h2>
+  <div id="listaTickets">No hay tickets registrados.</div>
+  <div class="total" id="total">
+    Total acumulado: 0 h 0 min
+  </div>
+</section>
+
+<section class="card">
+  <h2>4. Firmas de conformidad</h2>
+  <small>Desliza horizontalmente en el celular para acceder a las cuatro firmas.</small>
+
+  <div class="signatures-row">
+
+    <div class="signature-item">
+      <label>Firma del técnico</label>
+      <canvas id="firmaTecnico"></canvas>
+      <img class="signature-print" id="printFirmaTecnico">
+      <button class="secondary no-print"
+        onclick="limpiarFirma('firmaTecnico')">Limpiar</button>
+    </div>
+
+    <div class="signature-item">
+      <label>Firma aprobador 1</label>
+      <canvas id="firmaAprobador"></canvas>
+      <img class="signature-print" id="printFirmaAprobador">
+      <button class="secondary no-print"
+        onclick="limpiarFirma('firmaAprobador')">Limpiar</button>
+    </div>
+
+    <div class="signature-item">
+      <label>Firma Recursos Humanos</label>
+      <canvas id="firmaRRHH"></canvas>
+      <img class="signature-print" id="printFirmaRRHH">
+      <button class="secondary no-print"
+        onclick="limpiarFirma('firmaRRHH')">Limpiar</button>
+    </div>
+
+    <div class="signature-item">
+      <label>Firma de Gerencia</label>
+      <canvas id="firmaGerencia"></canvas>
+      <img class="signature-print" id="printFirmaGerencia">
+      <button class="secondary no-print"
+        onclick="limpiarFirma('firmaGerencia')">Limpiar</button>
+    </div>
+
+  </div>
+</section>
+
+<section class="card no-print">
+  <h2>5. Exportar y guardar</h2>
+  <div class="actions">
+    <button class="green" onclick="exportarExcel()">Exportar Excel</button>
+    <button onclick="exportarPDF()">Guardar PDF</button>
+    <button class="secondary" onclick="exportarRespaldo()">Respaldo JSON</button>
+    <button class="danger" onclick="borrarTodo()">Borrar todos los registros</button>
+  </div>
+  <small>Los datos se guardan automáticamente en este celular. Descarga respaldos periódicamente.</small>
+</section>
+
+</main>
+
+<div class="print-footer">
+  Registro de horas extra MOVILMAX
+</div>
+
+<section id="reporteImpresion" aria-hidden="true"></section>
+
+<footer class="no-print">
+  Registro de horas extra MOVILMAX
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const STORAGE_KEY = "movilmax_horas_v2";
+
+let registros = [];
+let firmas = {};
+let fotoActual = {fotoInicio:"",fotoFin:""};
+let editandoId = null;
+
+const nombresFirmas = [
+  "firmaTecnico",
+  "firmaAprobador",
+  "firmaRRHH",
+  "firmaGerencia"
+];
+
+function fechaHoy() {
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const dia=String(d.getDate()).padStart(2,"0");
+  return y+"-"+m+"-"+dia;
+}
+
+/* CARGA Y GUARDADO DE DATOS */
+
+function guardarEnMemoria() {
+  try {
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      registros,
+      firmas
+    }));
+    return true;
+  } catch(e) {
+    alert("No hay espacio suficiente para guardar. Exporta un respaldo y reduce las fotografías.");
+    return false;
+  }
+}
+
+function cargarDatos() {
+  try {
+    const datos=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    if(datos) {
+      registros=datos.registros||[];
+      firmas=datos.firmas||{};
+    }
+  } catch(e) {
+    alert("No se pudieron recuperar algunos datos guardados.");
+  }
+
+  /* Al iniciar, el formulario queda limpio.
+     Los tickets guardados NO se borran. */
+  limpiarFormulario();
+  mostrarTickets();
+}
+
+/* FOTOGRAFÍAS */
+
+function leerFoto(id,preview) {
+  $(id).addEventListener("change",e=>{
+    const archivo=e.target.files[0];
+    if(!archivo)return;
+
+    const lector=new FileReader();
+    lector.onload=()=>{
+      fotoActual[id]=lector.result;
+      mostrarPreview(id,preview,lector.result);
+    };
+    lector.readAsDataURL(archivo);
+  });
+}
+
+function mostrarPreview(id,preview,src) {
+  $(preview).innerHTML="";
+  if(!src)return;
+  const img=document.createElement("img");
+  img.src=src;
+  $(preview).appendChild(img);
+}
+
+leerFoto("fotoInicio","previewInicio");
+leerFoto("fotoFin","previewFin");
+
+/* GPS */
+
+async function obtenerDireccionDesdeGPS(lat,lon,campoDireccion,estado) {
+  $(estado).textContent="Coordenadas capturadas. Buscando dirección...";
+  try {
+    const url="https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="+
+      encodeURIComponent(lat)+"&longitude="+encodeURIComponent(lon)+"&localityLanguage=es";
+    const respuesta=await fetch(url,{headers:{"Accept":"application/json"}});
+    if(!respuesta.ok) throw new Error("No se pudo consultar el servicio de direcciones");
+    const d=await respuesta.json();
+    const partes=[d.street,d.locality,d.city,d.principalSubdivision,d.countryName].filter(Boolean);
+    const direccion=partes.filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+    if(direccion) {
+      $(campoDireccion).value=direccion;
+      $(estado).textContent="Dirección obtenida automáticamente. Puedes corregirla manualmente.";
+    } else {
+      $(estado).textContent="No se encontró una dirección exacta. Puedes escribirla manualmente.";
+    }
+  } catch(error) {
+    $(estado).textContent="GPS guardado; no se pudo consultar la dirección. Puedes escribirla manualmente.";
+  }
+}
+
+function capturarGPS(id) {
+  if(!navigator.geolocation) {
+    alert("Tu navegador no admite geolocalización.");
+    return;
+  }
+  const esInicio=id==="coordenadasInicio";
+  const estado=esInicio?"estadoInicio":"estadoFin";
+  const campoDireccion=esInicio?"direccionInicio":"direccionFin";
+  $(estado).textContent="Obteniendo ubicación GPS...";
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const lat=pos.coords.latitude.toFixed(6);
+    const lon=pos.coords.longitude.toFixed(6);
+    $(id).value=lat+", "+lon;
+    await obtenerDireccionDesdeGPS(lat,lon,campoDireccion,estado);
+  },error=>{
+    $(estado).textContent="No se pudo capturar GPS.";
+    let mensaje="Activa el GPS y permite el acceso a la ubicación.";
+    if(error && error.code===1) mensaje="Permite el acceso a la ubicación desde los permisos del navegador.";
+    if(error && error.code===3) mensaje="Se agotó el tiempo para obtener GPS. Inténtalo nuevamente.";
+    alert(mensaje);
+  },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
+}
+
+/* TIEMPOS */
+
+function minutos(hora) {
+  const [h,m]=hora.split(":").map(Number);
+  return Number(h)*60+Number(m);
+}
+
+function formato(min) {
+  return Math.floor(min/60)+" h "+(min%60)+" min";
+}
+
+function duracion(ini,fin) {
+  let d=minutos(fin)-minutos(ini);
+  if(d<0)d+=1440;
+  return d;
+}
+
+/* FORMULARIO */
+
+function obtenerFormulario() {
+  return {
+    tecnico:$("tecnico").value.trim(),
+    fecha:$("fecha").value,
+    area:$("area").value.trim(),
+    numero:$("ticket").value.trim(),
+    inicio:$("inicio").value,
+    fin:$("fin").value,
+    dur:duracion($("inicio").value,$("fin").value),
+    descripcion:$("descripcion").value.trim(),
+    direccionInicio:$("direccionInicio").value.trim(),
+    coordenadasInicio:$("coordenadasInicio").value.trim(),
+    direccionFin:$("direccionFin").value.trim(),
+    coordenadasFin:$("coordenadasFin").value.trim(),
+    fotoInicio:fotoActual.fotoInicio||"",
+    fotoFin:fotoActual.fotoFin||""
+  };
+}
+
+function guardarTicket() {
+  const estabaEditando=editandoId!==null;
+  const r=obtenerFormulario();
+
+  if(!r.tecnico||!r.fecha||!r.numero||!r.inicio||!r.fin) {
+    alert("Completa técnico, fecha, ticket y horarios.");
+    return;
+  }
+
+  if(r.dur===0) {
+    alert("La duración del ticket no puede ser cero.");
+    return;
+  }
+
+  if(editandoId!==null) {
+    const indice=registros.findIndex(x=>x.id===editandoId);
+    if(indice!==-1) {
+      r.id=editandoId;
+      registros[indice]=r;
+    }
+  } else {
+    r.id=Date.now();
+    registros.push(r);
+  }
+
+  if(!guardarEnMemoria())return;
+
+  limpiarFormulario();
+  mostrarTickets();
+  alert(estabaEditando?"Ticket actualizado correctamente.":"Ticket registrado correctamente.");
+}
+
+function limpiarFormulario() {
+  [
+    "tecnico","area","ticket","inicio","fin","descripcion",
+    "direccionInicio","coordenadasInicio",
+    "direccionFin","coordenadasFin"
+  ].forEach(id=>$(id).value="");
+
+  $("fecha").value=fechaHoy();
+  $("fotoInicio").value="";
+  $("fotoFin").value="";
+  $("previewInicio").innerHTML="";
+  $("previewFin").innerHTML="";
+  $("estadoInicio").textContent="";
+  $("estadoFin").textContent="";
+
+  fotoActual={fotoInicio:"",fotoFin:""};
+  editandoId=null;
+
+  $("modoEdicion").hidden=true;
+  $("btnAgregar").textContent="+ Agregar ticket";
+}
+
+/* EDITAR TICKET */
+
+function editarTicket(id) {
+  const r=registros.find(x=>x.id===id);
+  if(!r)return;
+
+  $("tecnico").value=r.tecnico||"";
+  $("fecha").value=r.fecha||fechaHoy();
+  $("area").value=r.area||"";
+  $("ticket").value=r.numero||"";
+  $("inicio").value=r.inicio||"";
+  $("fin").value=r.fin||"";
+  $("descripcion").value=r.descripcion||"";
+
+  $("direccionInicio").value=r.direccionInicio||"";
+  $("coordenadasInicio").value=r.coordenadasInicio||"";
+  $("direccionFin").value=r.direccionFin||"";
+  $("coordenadasFin").value=r.coordenadasFin||"";
+
+  fotoActual={
+    fotoInicio:r.fotoInicio||"",
+    fotoFin:r.fotoFin||""
+  };
+
+  mostrarPreview("fotoInicio","previewInicio",fotoActual.fotoInicio);
+  mostrarPreview("fotoFin","previewFin",fotoActual.fotoFin);
+
+  editandoId=id;
+  $("modoEdicion").hidden=false;
+  $("btnAgregar").textContent="Actualizar ticket";
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* MOSTRAR REGISTROS */
+
+function crearTexto(tag,contenido) {
+  const el=document.createElement(tag);
+  el.textContent=contenido;
+  return el;
+}
+
+function mostrarTickets() {
+  const lista=$("listaTickets");
+  lista.innerHTML="";
+
+  let total=0;
+
+  registros.forEach(r=>{
+    total+=r.dur||0;
+
+    const div=document.createElement("div");
+    div.className="ticket";
+
+    div.appendChild(crearTexto("h3","TICKET: "+r.numero));
+
+    div.appendChild(crearTexto("p",
+      "Técnico: "+r.tecnico+
+      " | Fecha: "+r.fecha+
+      " | Área: "+(r.area||"-")));
+
+    div.appendChild(crearTexto("p",
+      "Horario: "+r.inicio+" a "+r.fin+
+      " | Duración: "+formato(r.dur)));
+
+    div.appendChild(crearTexto("p",
+      "Actividad: "+(r.descripcion||"-")));
+
+    div.appendChild(crearTexto("p",
+      "Dirección inicial: "+(r.direccionInicio||"No indicada")));
+
+    div.appendChild(crearTexto("p",
+      "GPS inicial: "+(r.coordenadasInicio||"No registrado")));
+
+    div.appendChild(crearTexto("p",
+      "Dirección final: "+(r.direccionFin||"No indicada")));
+
+    div.appendChild(crearTexto("p",
+      "GPS final: "+(r.coordenadasFin||"No registrado")));
+
+    if(r.fotoInicio||r.fotoFin) {
+      const fotosDiv=document.createElement("div");
+      fotosDiv.className="ticket-fotos";
+
+      [["FOTOGRAFÍA INICIAL",r.fotoInicio],
+       ["FOTOGRAFÍA FINAL",r.fotoFin]].forEach(([nombre,src])=>{
+        if(!src)return;
+        const item=document.createElement("div");
+        item.className="foto-item";
+        item.appendChild(crearTexto("strong",nombre));
+        const img=document.createElement("img");
+        img.src=src;
+        item.appendChild(img);
+        fotosDiv.appendChild(item);
+      });
+
+      div.appendChild(fotosDiv);
+    }
+
+    const botones=document.createElement("div");
+    botones.className="actions no-print";
+
+    const editar=document.createElement("button");
+    editar.className="orange";
+    editar.textContent="Editar ticket";
+    editar.onclick=()=>editarTicket(r.id);
+
+    const eliminar=document.createElement("button");
+    eliminar.className="danger";
+    eliminar.textContent="Eliminar";
+    eliminar.onclick=()=>{
+      if(confirm("¿Eliminar el ticket "+r.numero+"?")) {
+        registros=registros.filter(x=>x.id!==r.id);
+        guardarEnMemoria();
+        mostrarTickets();
+      }
+    };
+
+    botones.append(editar,eliminar);
+    div.appendChild(botones);
+    lista.appendChild(div);
+  });
+
+  if(!registros.length) {
+    lista.textContent="No hay tickets registrados.";
+  }
+
+  $("total").textContent="Total acumulado: "+formato(total);
+}
+
+/* FIRMAS EN UNA SOLA FILA */
+
+function iniciarFirmas() {
+  nombresFirmas.forEach(id=>{
+    const canvas=$(id);
+    const ctx=canvas.getContext("2d");
+    let dibujando=false;
+
+    function preparar() {
+      const ancho=canvas.clientWidth||135;
+      canvas.width=ancho*devicePixelRatio;
+      canvas.height=55*devicePixelRatio;
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      ctx.lineWidth=2;
+      ctx.lineCap="round";
+      ctx.lineJoin="round";
+      ctx.strokeStyle="#17365D";
+
+      if(firmas[id]) {
+        const img=new Image();
+        img.onload=()=>ctx.drawImage(img,0,0,ancho,55);
+        img.src=firmas[id];
+      }
+    }
+
+    preparar();
+
+    function punto(e) {
+      const rect=canvas.getBoundingClientRect();
+      return {x:e.clientX-rect.left,y:e.clientY-rect.top};
+    }
+
+    canvas.addEventListener("pointerdown",e=>{
+      dibujando=true;
+      canvas.setPointerCapture(e.pointerId);
+      const p=punto(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x,p.y);
+    });
+
+    canvas.addEventListener("pointermove",e=>{
+      if(!dibujando)return;
+      const p=punto(e);
+      ctx.lineTo(p.x,p.y);
+      ctx.stroke();
+    });
+
+    function terminar() {
+      if(!dibujando)return;
+      dibujando=false;
+      firmas[id]=canvas.toDataURL("image/png");
+      guardarEnMemoria();
+    }
+
+    canvas.addEventListener("pointerup",terminar);
+    canvas.addEventListener("pointercancel",terminar);
+  });
+}
+
+function limpiarFirma(id) {
+  const canvas=$(id);
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  firmas[id]="";
+  guardarEnMemoria();
+}
+
+/* EXPORTAR EXCEL */
+
+function exportarExcel() {
+  if(typeof XLSX==="undefined") {
+    alert("No se pudo cargar Excel. Revisa tu conexión.");
+    return;
+  }
+
+  if(!registros.length) {
+    alert("No hay tickets para exportar.");
+    return;
+  }
+
+  const filas=registros.map(r=>({
+    Tecnico:r.tecnico,
+    Fecha:r.fecha,
+    Area:r.area,
+    Ticket:r.numero,
+    Hora_inicio:r.inicio,
+    Hora_fin:r.fin,
+    Duracion:formato(r.dur),
+    Minutos:r.dur,
+    Descripcion:r.descripcion,
+    Direccion_inicial:r.direccionInicio,
+    GPS_inicial:r.coordenadasInicio,
+    Direccion_final:r.direccionFin,
+    GPS_final:r.coordenadasFin
+  }));
+
+  const hoja=XLSX.utils.json_to_sheet(filas);
+  const libro=XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(libro,hoja,"Tickets");
+
+  const total=registros.reduce((s,r)=>s+(r.dur||0),0);
+
+  const resumen=[{
+    Tecnico:registros[0].tecnico,
+    Fecha:registros[0].fecha,
+    Area:registros[0].area,
+    Cantidad_tickets:registros.length,
+    Total_minutos:total,
+    Total_horas:formato(total)
+  }];
+
+  XLSX.utils.book_append_sheet(
+    libro,
+    XLSX.utils.json_to_sheet(resumen),
+    "Resumen"
+  );
+
+  XLSX.writeFile(libro,"Registro_horas_extra_MOVILMAX.xlsx");
+}
+
+/* RESPALDO Y PDF */
+
+function exportarRespaldo() {
+  const datos={registros,firmas};
+  const blob=new Blob(
+    [JSON.stringify(datos,null,2)],
+    {type:"application/json"}
+  );
+  descargar(blob,"Respaldo_horas_MOVILMAX.json");
+}
+
+function descargar(blob,nombre) {
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=nombre;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function escaparHTML(valor) {
+  return String(valor ?? "").replace(/[&<>\"']/g, caracter => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"
+  }[caracter]));
+}
+
+function fechaLegible(valor) {
+  if(!valor) return "-";
+  const partes=String(valor).split("-");
+  return partes.length===3 ? partes[2]+"/"+partes[1]+"/"+partes[0] : valor;
+}
+
+function generarReporteImpresion() {
+  const reporte=$("reporteImpresion");
+  const total=registros.reduce((s,r)=>s+(Number(r.dur)||0),0);
+  const tecnico=[...new Set(registros.map(r=>r.tecnico).filter(Boolean))].join(" / ") || "-";
+  const fechas=[...new Set(registros.map(r=>fechaLegible(r.fecha)).filter(Boolean))].join(" / ") || "-";
+  const areas=[...new Set(registros.map(r=>r.area).filter(Boolean))].join(" / ") || "-";
+
+  const filas=registros.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><b>${escaparHTML(r.numero||"-")}</b><div class="rep-detail">${escaparHTML(fechaLegible(r.fecha))}</div></td>
+      <td>${escaparHTML(r.area||"-")}</td>
+      <td>${escaparHTML(r.inicio||"-")}</td>
+      <td>${escaparHTML(r.fin||"-")}</td>
+      <td><b>${escaparHTML(formato(Number(r.dur)||0))}</b></td>
+    </tr>
+    <tr><td colspan="6" class="rep-detail">
+      <b>Actividad:</b> ${escaparHTML(r.descripcion||"No especificada")}<br>
+      <b>Ubicación inicial:</b> ${escaparHTML(r.direccionInicio||"No indicada")} ${r.coordenadasInicio ? "("+escaparHTML(r.coordenadasInicio)+")" : ""}<br>
+      <b>Ubicación final:</b> ${escaparHTML(r.direccionFin||"No indicada")} ${r.coordenadasFin ? "("+escaparHTML(r.coordenadasFin)+")" : ""}
+    </td></tr>
+    ${(r.fotoInicio||r.fotoFin) ? `<tr class="rep-photo-row"><td colspan="6"><div class="rep-photos">
+      ${r.fotoInicio ? `<div class="rep-photo"><b>FOTOGRAFÍA DE INICIO</b><img src="${escaparHTML(r.fotoInicio)}" alt="Fotografía de inicio del ticket ${escaparHTML(r.numero||'')}"></div>` : ""}
+      ${r.fotoFin ? `<div class="rep-photo"><b>FOTOGRAFÍA DE FINALIZACIÓN</b><img src="${escaparHTML(r.fotoFin)}" alt="Fotografía final del ticket ${escaparHTML(r.numero||'')}"></div>` : ""}
+    </div></td></tr>` : ""}` ).join("");
+
+  const firmasHTML=[
+    ["firmaTecnico","Técnico"],
+    ["firmaAprobador","Aprobador 1"],
+    ["firmaRRHH","Recursos Humanos"],
+    ["firmaGerencia","Gerencia"]
+  ].map(([id,label])=>`<div class="rep-sign">
+    ${firmas[id] ? `<img src="${firmas[id]}" alt="Firma ${label}">` : `<div style="height:59px"></div>`}
+    <div class="rep-line">${label}</div>
+  </div>`).join("");
+
+  reporte.innerHTML=`
+    <div class="rep-header">
+      <div class="rep-brand">MOVILMAX<small>REGISTRO ADMINISTRATIVO</small></div>
+      <div class="rep-title">CONTROL DE HORAS EXTRAS<div class="rep-subtitle">REGISTRO DE ATENCIONES TÉCNICAS</div></div>
+    </div>
+    <section class="rep-section">
+      <h2>1. DATOS DEL PERSONAL Y DEL SERVICIO</h2>
+      <div class="rep-data">
+        <div class="rep-field"><b>TÉCNICO</b>${escaparHTML(tecnico)}</div>
+        <div class="rep-field"><b>FECHA(S) DE ATENCIÓN</b>${escaparHTML(fechas)}</div>
+        <div class="rep-field"><b>ÁREA / SERVICIO</b>${escaparHTML(areas)}</div>
+        <div class="rep-field"><b>CANTIDAD DE TICKETS</b>${registros.length}</div>
+      </div>
+    </section>
+    <section class="rep-section">
+      <h2>2. DETALLE DE ATENCIONES</h2>
+      <table class="rep-table"><thead><tr><th>N.º</th><th>TICKET / FECHA</th><th>ÁREA</th><th>INICIO</th><th>FIN</th><th>DURACIÓN</th></tr></thead>
+      <tbody>${filas}</tbody></table>
+      <div class="rep-total">TOTAL ACUMULADO DE HORAS EXTRAS: ${escaparHTML(formato(total))}</div>
+    </section>
+    <section class="rep-section">
+      <h2>3. CONFORMIDAD Y APROBACIÓN</h2>
+      <p style="font-size:10px;line-height:1.5">Mediante las firmas correspondientes se deja constancia de la revisión y conformidad del registro de atenciones y del tiempo consignado en el presente documento.</p>
+      <div class="rep-signatures">${firmasHTML}</div>
+    </section>
+    <div class="rep-note">Documento generado para revisión, conformidad y aprobación interna · MOVILMAX</div>`;
+}
+
+function exportarPDF() {
+  if (!registros.length) {
+    alert("Primero registra al menos un ticket.");
+    return;
+  }
+  generarReporteImpresion();
+  // Usa la impresión nativa del navegador: el usuario elige Guardar como PDF.
+  setTimeout(() => window.print(), 250);
+}
+
+/* IMPRESIÓN */
+
+window.addEventListener("beforeprint",()=>{
+  generarReporteImpresion();
+});
+
+/* BORRADO GENERAL */
+
+function borrarTodo() {
+  if(!confirm("¿Seguro que deseas borrar todos los tickets y firmas?"))return;
+
+  registros=[];
+  firmas={};
+  guardarEnMemoria();
+  limpiarFormulario();
+
+  nombresFirmas.forEach(id=>{
+    const canvas=$(id);
+    const ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  });
+
+  mostrarTickets();
+}
+
+/* INICIO */
+
+cargarDatos();
+iniciarFirmas();
+
+</script>
+</body>
+</html>
