@@ -7,6 +7,7 @@
 <title>Control de horas extras - MOVILMAX</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root {
@@ -255,7 +256,7 @@ footer {
 
 @page {
   size:A4;
-  margin:11mm 13mm 11mm;
+  margin:14mm 13mm 16mm;
 }
 
 @media print {
@@ -263,12 +264,12 @@ footer {
   body > header, body > main, body > .print-footer, body > footer {display:none !important}
   #reporteImpresion {display:block !important}
   #reporteImpresion * {box-sizing:border-box}
-  .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:9px;margin-bottom:11px}
+  .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:12px;margin-bottom:16px}
   .rep-brand {font-size:21px;font-weight:800;letter-spacing:1px;color:#17365d}
   .rep-brand small {display:block;font-size:9px;letter-spacing:0;color:#52657b;font-weight:normal;margin-top:4px}
   .rep-title {text-align:right;color:#17365d;font-size:17px;font-weight:bold}
   .rep-subtitle {font-size:9px;color:#52657b;margin-top:4px}
-  .rep-section {margin:10px 0;break-inside:avoid}
+  .rep-section {margin:15px 0;break-inside:avoid}
   .rep-section h2 {font-size:12px;color:#17365d;border-bottom:1px solid #9aabba;padding:0 0 6px;margin:0 0 9px}
   .rep-data {display:grid;grid-template-columns:1fr 1fr;gap:7px 18px}
   .rep-field {padding:5px 0;border-bottom:1px solid #e2e7ed}
@@ -285,17 +286,49 @@ footer {
   .rep-photo b {display:block;font-size:10px;color:#17365d;margin-bottom:7px}
   .rep-photo img {display:block;width:100%;height:320px;max-height:320px;object-fit:contain;background:#fff}
   .rep-total {margin-top:12px;padding:10px 12px;background:#eef3f8;border-left:4px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:14px}
-  .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;break-inside:avoid}
+  .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:30px;break-inside:avoid}
   .rep-sign {text-align:center;min-width:0}
   .rep-sign img {width:100%;height:54px;object-fit:contain;display:block;margin:0 auto 5px}
   .rep-sign .rep-line {border-top:1px solid #52657b;margin-top:4px;padding-top:5px;font-size:9px;min-height:25px}
-  .rep-note {font-size:8px;color:#64748b;text-align:center;margin-top:7px;break-inside:avoid;page-break-inside:avoid}
+  .rep-note {font-size:9px;color:#64748b;text-align:center;margin-top:16px}
   .rep-empty {color:#64748b;font-style:italic}
 }
+
+/* ACCESO Y SESION */
+body:not(.autenticado) > header, body:not(.autenticado) > main, body:not(.autenticado) > footer {display:none}
+#pantallaAcceso {min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#17365D,#24558A)}
+#pantallaAcceso .login-card {width:100%;max-width:410px;background:#fff;border-radius:14px;padding:26px;box-shadow:0 15px 45px #0003}
+#pantallaAcceso h2 {margin:0 0 8px;color:#17365D;border:0;padding:0;font-size:22px}
+#pantallaAcceso p {font-size:13px;color:#64748b;line-height:1.5}
+#pantallaAcceso button {width:100%;margin-top:14px}
+#loginEstado {min-height:18px;font-size:12px;color:#b42318;margin-top:10px}
+#barraSesion {max-width:950px;margin:12px auto 0;padding:0 13px;display:none;justify-content:space-between;align-items:center;gap:10px;font-size:12px}
+body.autenticado #barraSesion {display:flex}
+#barraSesion button {padding:7px 11px;background:#64748b}
+@media(max-width:600px){#barraSesion{align-items:flex-start;flex-direction:column}}
+
 </style>
 </head>
 
 <body>
+
+<section id="pantallaAcceso">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:18px">
+      <img src="https://www.movilmax.pe/wp-content/uploads/2025/01/mmx-logo-2025-blanco-300x47.png" alt="MOVILMAX" style="width:190px;max-width:100%;filter:brightness(0) saturate(100%) invert(17%) sepia(24%) saturate(1680%) hue-rotate(176deg) brightness(90%)">
+    </div>
+    <h2>Ingreso al sistema</h2>
+    <p>Control de horas extras MOVILMAX. Ingresa con tu usuario y contraseña asignados.</p>
+    <label for="loginUsuario">Usuario</label>
+    <input id="loginUsuario" autocomplete="username" placeholder="Ej. ruben.carranza">
+    <label for="loginPassword">Contraseña</label>
+    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Tu contraseña">
+    <button id="btnLogin" type="button" onclick="iniciarSesion()">Iniciar sesión</button>
+    <div id="loginEstado" role="status"></div>
+  </div>
+</section>
+<div id="barraSesion"><span id="sesionTexto"></span><button type="button" onclick="cerrarSesion()">Cerrar sesión</button></div>
+
 
 <header>
   <img class="logo"
@@ -487,18 +520,21 @@ footer {
 const $ = id => document.getElementById(id);
 
 const STORAGE_KEY = "movilmax_horas_v2";
+const SUPABASE_URL = "https://evgupfjhpuztxykqzuwe.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_bkmWRUHaVaunPbfgWosMoQ_lZfwlWP_";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const BUCKET_ARCHIVOS = "movilmax-archivos";
 
 let registros = [];
 let firmas = {};
 let fotoActual = {fotoInicio:"",fotoFin:""};
 let editandoId = null;
+let usuarioActual = null;
+let perfilActual = null;
+let perfilesCache = {};
+let cargandoRemoto = false;
 
-const nombresFirmas = [
-  "firmaTecnico",
-  "firmaAprobador",
-  "firmaRRHH",
-  "firmaGerencia"
-];
+const nombresFirmas = ["firmaTecnico","firmaAprobador","firmaRRHH","firmaGerencia"];
 
 function fechaHoy() {
   const d=new Date();
@@ -508,90 +544,134 @@ function fechaHoy() {
   return y+"-"+m+"-"+dia;
 }
 
-/* CARGA Y GUARDADO DE DATOS */
-
 function guardarEnMemoria() {
-  const datos=JSON.stringify({registros,firmas});
+  // Solo conserva temporalmente las firmas en este navegador; los tickets van a Supabase.
+  try { localStorage.setItem(STORAGE_KEY,JSON.stringify({firmas})); return true; }
+  catch(e) { alert("No se pudieron conservar las firmas en este dispositivo."); return false; }
+}
+
+function uuidNuevo() {
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==="x"?r:(r&3|8)).toString(16)});
+}
+
+function emailDeUsuario(usuario) {
+  const u=String(usuario||"").trim().toLowerCase();
+  return u==="supervisor" ? "cesardesigne@gmail.com" : u+"@login.movilmax.invalid";
+}
+
+async function iniciarSesion() {
+  const usuario=$("loginUsuario").value.trim().toLowerCase();
+  const password=$("loginPassword").value;
+  const estado=$("loginEstado");
+  const boton=$("btnLogin");
+  if(!usuario||!password){estado.textContent="Ingresa tu usuario y contraseña.";return;}
+  boton.disabled=true; estado.style.color="#64748b"; estado.textContent="Verificando acceso...";
   try {
-    localStorage.setItem(STORAGE_KEY,datos);
-    return true;
+    const {data,error}=await db.auth.signInWithPassword({email:emailDeUsuario(usuario),password});
+    if(error) throw error;
+    usuarioActual=data.user;
+    const {data:perfil,error:errPerfil}=await db.from("perfiles").select("id,nombre,usuario,rol").eq("id",usuarioActual.id).single();
+    if(errPerfil) throw errPerfil;
+    if(!perfil || perfil.usuario!==usuario){await db.auth.signOut();throw new Error("El usuario no coincide con el perfil registrado.");}
+    perfilActual=perfil;
+    document.body.classList.add("autenticado");
+    $("pantallaAcceso").style.display="none";
+    $("sesionTexto").textContent=(perfil.nombre||perfil.usuario)+" · "+(perfil.rol==="supervisor"?"Supervisor":"Técnico");
+    $("tecnico").value=perfil.nombre||"";
+    $("tecnico").readOnly=perfil.rol!=="supervisor";
+    await cargarDatos();
+    if(perfil.rol==="supervisor") await cargarPerfiles();
+    estado.textContent="";
   } catch(e) {
-    // Segundo intento: comprime las imágenes ya guardadas para liberar espacio.
-    try {
-      registros.forEach(r=>{
-        if(r.fotoInicio && r.fotoInicio.startsWith("data:image/")) r.fotoInicio=r.fotoInicio;
-        if(r.fotoFin && r.fotoFin.startsWith("data:image/")) r.fotoFin=r.fotoFin;
-      });
-      localStorage.setItem(STORAGE_KEY,JSON.stringify({registros,firmas}));
-      return true;
-    } catch(error) {
-      alert("El almacenamiento de este navegador está lleno. Exporta un respaldo JSON y elimina fotos antiguas o registros que ya no necesites.");
-      return false;
-    }
+    estado.style.color="#b42318";
+    estado.textContent="No se pudo iniciar sesión. Verifica el usuario y la contraseña. "+(e.message||"");
+    try { await db.auth.signOut(); } catch(_) {}
+  } finally { boton.disabled=false; }
+}
+
+async function cerrarSesion() {
+  await db.auth.signOut();
+  usuarioActual=null; perfilActual=null; registros=[]; firmas={};
+  document.body.classList.remove("autenticado");
+  $("pantallaAcceso").style.display="flex";
+  $("loginPassword").value="";
+  $("loginEstado").textContent="Sesión cerrada.";
+  mostrarTickets();
+}
+
+async function cargarPerfiles() {
+  const {data,error}=await db.from("perfiles").select("id,nombre,usuario,rol").order("nombre");
+  if(error) throw error;
+  perfilesCache={};
+  (data||[]).forEach(p=>perfilesCache[p.id]=p);
+}
+
+function dataURLaBlob(dataURL) {
+  const partes=dataURL.split(",");
+  const mime=(partes[0].match(/:(.*?);/)||[])[1]||"image/jpeg";
+  const bin=atob(partes[1]);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new Blob([bytes],{type:mime});
+}
+
+async function subirArchivo(ticketId,tipo,dataURL) {
+  if(!dataURL || !dataURL.startsWith("data:image/")) return;
+  const extension=dataURL.startsWith("data:image/png")?"png":"jpg";
+  const ruta=usuarioActual.id+"/"+ticketId+"/"+tipo+"-"+Date.now()+"."+extension;
+  const {error:upError}=await db.storage.from(BUCKET_ARCHIVOS).upload(ruta,dataURLaBlob(dataURL),{contentType:extension==="png"?"image/png":"image/jpeg",upsert:false});
+  if(upError) throw upError;
+  const {error:metaError}=await db.from("archivos_ticket").insert({ticket_id:ticketId,tipo,ruta_archivo:ruta,creado_por:usuarioActual.id});
+  if(metaError) throw metaError;
+}
+
+async function cargarArchivosTickets(ids) {
+  const resultado={};
+  if(!ids.length) return resultado;
+  const {data,error}=await db.from("archivos_ticket").select("id,ticket_id,tipo,ruta_archivo,creado_en").in("ticket_id",ids).order("creado_en",{ascending:false});
+  if(error) throw error;
+  for(const f of (data||[])) {
+    if(!resultado[f.ticket_id]) resultado[f.ticket_id]={};
+    if(resultado[f.ticket_id][f.tipo]) continue;
+    const {data:firmado,error:err}=await db.storage.from(BUCKET_ARCHIVOS).createSignedUrl(f.ruta_archivo,3600);
+    if(!err && firmado) resultado[f.ticket_id][f.tipo]=firmado.signedUrl;
   }
-}
-
-function comprimirDataURL(dataURL,max=1100,calidad=0.58) {
-  return new Promise((resolve)=>{
-    if(!dataURL || !dataURL.startsWith("data:image/")){resolve(dataURL||"");return;}
-    const img=new Image();
-    img.onload=()=>{
-      const escala=Math.min(1,max/Math.max(img.width,img.height));
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(img.width*escala));
-      canvas.height=Math.max(1,Math.round(img.height*escala));
-      canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-      resolve(canvas.toDataURL("image/jpeg",calidad));
-    };
-    img.onerror=()=>resolve(dataURL);
-    img.src=dataURL;
-  });
-}
-
-function comprimirImagenArchivo(archivo,max=1280,calidad=0.65) {
-  return new Promise((resolve,reject)=>{
-    if(!archivo){resolve("");return;}
-    const lector=new FileReader();
-    lector.onerror=reject;
-    lector.onload=()=>{
-      const img=new Image();
-      img.onerror=reject;
-      img.onload=()=>{
-        const escala=Math.min(1,max/Math.max(img.width,img.height));
-        const canvas=document.createElement("canvas");
-        canvas.width=Math.max(1,Math.round(img.width*escala));
-        canvas.height=Math.max(1,Math.round(img.height*escala));
-        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-        resolve(canvas.toDataURL("image/jpeg",calidad));
-      };
-      img.src=lector.result;
-    };
-    lector.readAsDataURL(archivo);
-  });
+  return resultado;
 }
 
 async function cargarDatos() {
+  if(!usuarioActual) return;
+  cargandoRemoto=true;
   try {
-    const datos=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-    if(datos) {
-      registros=datos.registros||[];
-      firmas=datos.firmas||{};
-    }
+    const guardado=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    firmas=guardado?.firmas||{};
+    restaurarFirmasCanvas();
+    let consulta=db.from("tickets").select("*").order("fecha",{ascending:false});
+    const {data,error}=await consulta;
+    if(error) throw error;
+    const filas=data||[];
+    if(perfilActual.rol==="supervisor") await cargarPerfiles();
+    const archivos=await cargarArchivosTickets(filas.map(t=>t.id));
+    registros=filas.map(t=>{
+      const f=archivos[t.id]||{};
+      const perfil=perfilesCache[t.usuario_id];
+      return {
+        id:t.id, _usuario_id:t.usuario_id,
+        tecnico:perfil?.nombre || (t.usuario_id===usuarioActual.id?perfilActual.nombre:"Técnico"),
+        fecha:t.fecha, area:t.area||t.servicio||"", numero:t.numero_ticket||"",
+        inicio:t.hora_inicio||"", fin:t.hora_fin||"", dur:t.duracion_minutos,
+        descripcion:t.descripcion||"", direccionInicio:t.direccion_inicio||"",
+        direccionFin:t.direccion_fin||"", coordenadasInicio:t.coordenadas_inicio||"",
+        coordenadasFin:t.coordenadas_fin||"", fotoInicio:f.foto_inicio||"", fotoFin:f.foto_fin||""
+      };
+    });
+    limpiarFormulario();
+    $("tecnico").value=perfilActual.rol==="supervisor"?"":perfilActual.nombre;
+    mostrarTickets();
   } catch(e) {
-    alert("No se pudieron recuperar algunos datos guardados.");
-  }
-
-  // Comprime fotografías antiguas que fueron guardadas sin optimización.
-  for(const r of registros){
-    r.fotoInicio=await comprimirDataURL(r.fotoInicio,1100,0.58);
-    r.fotoFin=await comprimirDataURL(r.fotoFin,1100,0.58);
-  }
-  if(registros.length) guardarEnMemoria();
-
-  /* Al iniciar, el formulario queda limpio.
-     Los tickets guardados NO se borran. */
-  limpiarFormulario();
-  mostrarTickets();
+    alert("No se pudieron cargar los registros desde Supabase: "+(e.message||e));
+  } finally { cargandoRemoto=false; }
 }
 
 /* FOTOGRAFÍAS */
@@ -749,33 +829,31 @@ function obtenerFormulario() {
   };
 }
 
-function guardarTicket() {
+async function guardarTicket() {
   const estabaEditando=editandoId!==null;
   const r=obtenerFormulario();
-
-  if(!r.tecnico||!r.fecha||!r.numero) {
-    alert("Completa como mínimo el técnico, la fecha y el número de ticket. Las horas pueden quedar pendientes.");
-    return;
-  }
-
+  if(!r.tecnico||!r.fecha||!r.numero) { alert("Completa como mínimo el técnico, la fecha y el número de ticket. Las horas pueden quedar pendientes."); return; }
   if(r.dur===0) r.dur=null;
-
-  if(editandoId!==null) {
-    const indice=registros.findIndex(x=>x.id===editandoId);
-    if(indice!==-1) {
-      r.id=editandoId;
-      registros[indice]=r;
-    }
-  } else {
-    r.id=Date.now();
-    registros.push(r);
-  }
-
-  if(!guardarEnMemoria())return;
-
-  limpiarFormulario();
-  mostrarTickets();
-  alert(estabaEditando?"Ticket actualizado correctamente.":"Ticket registrado correctamente.");
+  if(!usuarioActual){alert("Inicia sesión para guardar tickets.");return;}
+  const boton=$("btnAgregar"); boton.disabled=true; boton.textContent="Guardando...";
+  try {
+    const id=editandoId||uuidNuevo();
+    const usuarioId=editandoId ? (registros.find(x=>x.id===editandoId)?._usuario_id||usuarioActual.id) : usuarioActual.id;
+    const payload={id,usuario_id:usuarioId,fecha:r.fecha,area:r.area||null,servicio:r.area||null,numero_ticket:r.numero,
+      hora_inicio:r.inicio||null,hora_fin:r.fin||null,descripcion:r.descripcion||null,
+      direccion_inicio:r.direccionInicio||null,direccion_fin:r.direccionFin||null,
+      coordenadas_inicio:r.coordenadasInicio||null,coordenadas_fin:r.coordenadasFin||null,duracion_minutos:r.dur};
+    const {error}=await db.from("tickets").upsert(payload,{onConflict:"id"});
+    if(error) throw error;
+    await subirArchivo(id,"foto_inicio",r.fotoInicio);
+    await subirArchivo(id,"foto_fin",r.fotoFin);
+    const tiposFirma={firmaTecnico:"firma_tecnico",firmaAprobador:"firma_aprobador",firmaRRHH:"firma_rrhh",firmaGerencia:"firma_gerencia"};
+    for(const [clave,tipo] of Object.entries(tiposFirma)) await subirArchivo(id,tipo,firmas[clave]||"");
+    await cargarDatos();
+    alert(estabaEditando?"Ticket actualizado correctamente en la nube.":"Ticket registrado correctamente en la nube.");
+  } catch(e) {
+    alert("No se pudo guardar el ticket. "+(e.message||e)+". Verifica tu conexión e inténtalo nuevamente.");
+  } finally { boton.disabled=false; boton.textContent=editandoId!==null?"Actualizar ticket":"+ Agregar ticket"; }
 }
 
 function limpiarFormulario() {
@@ -910,12 +988,20 @@ function mostrarTickets() {
     const eliminar=document.createElement("button");
     eliminar.className="danger";
     eliminar.textContent="Eliminar";
-    eliminar.onclick=()=>{
-      if(confirm("¿Eliminar el ticket "+r.numero+"?")) {
-        registros=registros.filter(x=>x.id!==r.id);
-        guardarEnMemoria();
-        mostrarTickets();
-      }
+    eliminar.onclick=async()=>{
+      if(!confirm("¿Eliminar el ticket "+r.numero+" de la base de datos?")) return;
+      eliminar.disabled=true;
+      try {
+        const {data:archivos,error:errArch}=await db.from("archivos_ticket").select("ruta_archivo").eq("ticket_id",r.id);
+        if(errArch) throw errArch;
+        const rutas=(archivos||[]).map(x=>x.ruta_archivo);
+        if(rutas.length) { const {error:errStorage}=await db.storage.from(BUCKET_ARCHIVOS).remove(rutas); if(errStorage) throw errStorage; }
+        const {error:errMeta}=await db.from("archivos_ticket").delete().eq("ticket_id",r.id);
+        if(errMeta) throw errMeta;
+        const {error}=await db.from("tickets").delete().eq("id",r.id);
+        if(error) throw error;
+        await cargarDatos();
+      } catch(e) { alert("No se pudo eliminar: "+(e.message||e)); eliminar.disabled=false; }
     };
 
     botones.append(editar,eliminar);
@@ -931,6 +1017,15 @@ function mostrarTickets() {
 }
 
 /* FIRMAS EN UNA SOLA FILA */
+
+function restaurarFirmasCanvas() {
+  nombresFirmas.forEach(id=>{
+    const canvas=$(id); if(!canvas || !firmas[id]) return;
+    const img=new Image();
+    img.onload=()=>{const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.clientWidth||135,55);};
+    img.src=firmas[id];
+  });
+}
 
 function iniciarFirmas() {
   nombresFirmas.forEach(id=>{
@@ -1165,27 +1260,49 @@ window.addEventListener("beforeprint",()=>{
 
 /* BORRADO GENERAL */
 
-function borrarTodo() {
-  if(!confirm("¿Seguro que deseas borrar todos los tickets y firmas?"))return;
-
-  registros=[];
-  firmas={};
-  guardarEnMemoria();
-  limpiarFormulario();
-
-  nombresFirmas.forEach(id=>{
-    const canvas=$(id);
-    const ctx=canvas.getContext("2d");
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-  });
-
-  mostrarTickets();
+async function borrarTodo() {
+  if(!usuarioActual) return;
+  if(!confirm("¿Seguro que deseas borrar todos los tickets que puedes administrar? Esta acción no se puede deshacer."))return;
+  try {
+    const ids=registros.map(r=>r.id);
+    if(ids.length) {
+      const {data:archivos,error:errArch}=await db.from("archivos_ticket").select("ruta_archivo").in("ticket_id",ids);
+      if(errArch) throw errArch;
+      const rutas=(archivos||[]).map(x=>x.ruta_archivo);
+      if(rutas.length) { const {error}=await db.storage.from(BUCKET_ARCHIVOS).remove(rutas); if(error) throw error; }
+      const {error:errMeta}=await db.from("archivos_ticket").delete().in("ticket_id",ids);
+      if(errMeta) throw errMeta;
+      const {error}=await db.from("tickets").delete().in("id",ids);
+      if(error) throw error;
+    }
+    registros=[]; firmas={}; guardarEnMemoria(); limpiarFormulario();
+    nombresFirmas.forEach(id=>{const c=$(id);c.getContext("2d").clearRect(0,0,c.width,c.height);});
+    mostrarTickets(); alert("Se eliminaron los registros visibles para tu cuenta.");
+  } catch(e) { alert("No se pudieron borrar los registros: "+(e.message||e)); }
 }
 
 /* INICIO */
 
-cargarDatos();
 iniciarFirmas();
+// Si ya existe una sesión válida, se recupera; de lo contrario se muestra el acceso.
+(async()=>{
+  try {
+    const {data}=await db.auth.getSession();
+    if(data?.session?.user) {
+      usuarioActual=data.session.user;
+      const {data:perfil,error}=await db.from("perfiles").select("id,nombre,usuario,rol").eq("id",usuarioActual.id).single();
+      if(!error && perfil) {
+        perfilActual=perfil;
+        document.body.classList.add("autenticado");
+        $("pantallaAcceso").style.display="none";
+        $("sesionTexto").textContent=(perfil.nombre||perfil.usuario)+" · "+(perfil.rol==="supervisor"?"Supervisor":"Técnico");
+        $("tecnico").value=perfil.nombre||"";
+        $("tecnico").readOnly=perfil.rol!=="supervisor";
+        await cargarDatos();
+      } else { await db.auth.signOut(); }
+    }
+  } catch(e) { console.error("Error al restaurar sesión",e); }
+})();
 
 </script>
 </body>
