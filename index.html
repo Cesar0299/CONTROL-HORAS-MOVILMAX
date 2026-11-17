@@ -272,6 +272,8 @@ footer {
   body > header, body > main, body > .print-footer, body > footer {display:none !important}
   #reporteImpresion {display:block !important}
   #reporteImpresion * {box-sizing:border-box}
+  #reporteImpresion .rep-page {break-after:page;page-break-after:always;min-height:265mm;}
+  #reporteImpresion .rep-page:last-child {break-after:auto;page-break-after:auto}
   .rep-header {display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #17365d;padding-bottom:12px;margin-bottom:16px}
   .rep-brand {font-size:21px;font-weight:800;letter-spacing:1px;color:#17365d}
   .rep-brand small {display:block;font-size:9px;letter-spacing:0;color:#52657b;font-weight:normal;margin-top:4px}
@@ -287,12 +289,12 @@ footer {
   .rep-table th,.rep-table td {border:1px solid #cbd5df;padding:7px 6px;vertical-align:top}
   .rep-detail {font-size:9px;line-height:1.45;color:#334155;white-space:normal;overflow-wrap:anywhere}
   .rep-table td {overflow-wrap:anywhere}
-  .rep-photo img {max-height:320px}
+  .rep-photo img {max-height:340px}
   .rep-photo-row td {padding:12px 8px;background:#fbfcfe}
   .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   .rep-photo {border:1px solid #cbd5df;border-radius:6px;padding:8px;text-align:center;break-inside:avoid}
   .rep-photo b {display:block;font-size:10px;color:#17365d;margin-bottom:7px}
-  .rep-photo img {display:block;width:100%;height:320px;max-height:320px;object-fit:contain;background:#fff}
+  .rep-photo img {display:block;width:88%;max-width:88%;height:340px;max-height:340px;margin:0 auto;object-fit:contain;background:#fff}
   .rep-total {margin-top:12px;padding:10px 12px;background:#eef3f8;border-left:4px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:14px}
   .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:30px;break-inside:avoid}
   .rep-sign {text-align:center;min-width:0}
@@ -335,13 +337,51 @@ footer {
 #reporteImpresion.pdf-mode .rep-photos {display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
 #reporteImpresion.pdf-mode .rep-photo {border:1px solid #cbd5df;border-radius:5px;padding:4px;text-align:center}
 #reporteImpresion.pdf-mode .rep-photo b {display:block;font-size:8px;color:#17365d;margin-bottom:3px}
-#reporteImpresion.pdf-mode .rep-photo img {display:block;width:100%;height:145px;object-fit:contain;background:#fff}
+#reporteImpresion.pdf-mode .rep-photo img {
+  display:block;
+  width:100%;
+  height:230px;
+  max-height:230px;
+  object-fit:contain;
+  background:#fff;
+}
+#reporteImpresion.pdf-mode .rep-photos {gap:10px}
+#reporteImpresion.pdf-mode .rep-photo {padding:6px}
+#reporteImpresion.pdf-mode .rep-photo b {font-size:9px;margin-bottom:5px}
 #reporteImpresion.pdf-mode .rep-total {margin-top:6px;padding:6px 8px;background:#eef3f8;border-left:3px solid #17365d;text-align:right;font-weight:bold;color:#17365d;font-size:10px}
 #reporteImpresion.pdf-mode .rep-signatures {display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:10px}
 #reporteImpresion.pdf-mode .rep-sign {text-align:center;min-width:0}
-#reporteImpresion.pdf-mode .rep-sign img {width:100%;height:38px;object-fit:contain;display:block;margin:0 auto 3px}
+#reporteImpresion.pdf-mode .rep-sign img {width:100%;height:48px;object-fit:contain;display:block;margin:0 auto 3px}
 #reporteImpresion.pdf-mode .rep-sign .rep-line {border-top:1px solid #52657b;margin-top:3px;padding-top:3px;font-size:8px;min-height:18px}
 #reporteImpresion.pdf-mode .rep-note {font-size:7px;color:#64748b;text-align:center;margin-top:8px}
+
+#reporteImpresion.pdf-mode .rep-page {
+  width:794px;min-height:1123px;height:auto;padding:34px 38px;
+  background:#fff;color:#202b38;overflow:visible;position:relative;
+  page-break-after:always;box-sizing:border-box;
+}
+#reporteImpresion.pdf-mode .rep-page:last-child {page-break-after:auto}
+#reporteImpresion.pdf-mode .rep-page .rep-header {margin-bottom:17px;padding-bottom:12px}
+#reporteImpresion.pdf-mode .rep-page .rep-brand {font-size:22px}
+#reporteImpresion.pdf-mode .rep-page .rep-title {font-size:17px}
+#reporteImpresion.pdf-mode .rep-page .rep-section {margin:16px 0}
+#reporteImpresion.pdf-mode .rep-page .rep-section h2 {font-size:12px;margin-bottom:8px;padding-bottom:6px}
+#reporteImpresion.pdf-mode .rep-page .rep-data {gap:8px 18px}
+#reporteImpresion.pdf-mode .rep-page .rep-field {padding:6px 0;font-size:11px}
+#reporteImpresion.pdf-mode .rep-page .rep-field b {font-size:9px}
+#reporteImpresion.pdf-mode .rep-page .rep-detail {font-size:10px;line-height:1.45}
+#reporteImpresion.pdf-mode .rep-page .rep-photos {grid-template-columns:1fr 1fr;gap:12px}
+#reporteImpresion.pdf-mode .rep-page .rep-photo {padding:8px}
+#reporteImpresion.pdf-mode .rep-page .rep-photo b {font-size:10px;margin-bottom:7px}
+#reporteImpresion.pdf-mode .rep-page .rep-photo img {height:340px;max-height:340px;width:88%;max-width:88%;margin:0 auto;object-fit:contain}
+#reporteImpresion.pdf-mode .rep-page .rep-signatures {margin-top:24px;gap:12px}
+#reporteImpresion.pdf-mode .rep-page .rep-sign img {height:65px}
+#reporteImpresion.pdf-mode .rep-page .rep-sign .rep-line {font-size:9px;min-height:24px}
+#reporteImpresion.pdf-mode .rep-page .rep-total {font-size:12px;margin-top:12px;padding:9px}
+#reporteImpresion.pdf-mode .rep-page .rep-note {font-size:8px;margin-top:16px}
+.ticket-select {display:flex;align-items:center;gap:7px;margin-bottom:8px;font-weight:bold;color:#17365d}
+.ticket-select input {width:18px;height:18px}
+
 
 /* ACCESO Y SESION */
 body:not(.autenticado) > header, body:not(.autenticado) > main, body:not(.autenticado) > footer {display:none}
@@ -495,6 +535,13 @@ body.autenticado #barraSesion {display:flex}
 
 <section class="card">
   <h2>3. Tickets registrados</h2>
+  <div class="actions no-print" style="margin-bottom:12px;flex-wrap:wrap">
+    <button class="secondary" type="button" onclick="seleccionarTodosTickets(true)">Seleccionar todos</button>
+    <button class="secondary" type="button" onclick="seleccionarTodosTickets(false)">Quitar selección</button>
+    <button class="green" type="button" id="btnPDFSeleccionados" onclick="exportarPDFSeleccionados()">Descargar PDF seleccionados</button>
+    <button class="green" type="button" onclick="exportarPDF()">Descargar PDF de todos</button>
+  </div>
+  <small class="no-print">Marca uno o varios tickets. Cada ticket se generará en una página A4 independiente.</small>
   <div id="listaTickets">No hay tickets registrados.</div>
   <div class="total" id="total">
     Total acumulado: 0 h 0 min
@@ -950,8 +997,7 @@ function limpiarFormulario() {
   [
     "tecnico","area","ticket","inicio","fin","descripcion",
     "direccionInicio","coordenadasInicio",
-    "direccionFin","coordenadasFin"
-  ].forEach(id=>$(id).value="");
+    "direccionFin","coordenadasFin"  ].forEach(id=>$(id).value="");
 
   $("fecha").value=fechaHoy();
   $("fotoInicio").value="";
@@ -1022,6 +1068,13 @@ function mostrarTickets() {
     const div=document.createElement("div");
     div.className="ticket";
 
+    const selector=document.createElement("label");
+    selector.className="ticket-select no-print";
+    const check=document.createElement("input");
+    check.type="checkbox"; check.className="ticket-pdf-check"; check.value=String(r.id);
+    check.setAttribute("aria-label","Seleccionar ticket "+(r.numero||""));
+    selector.append(check,crearTexto("span","Incluir en PDF"));
+    div.appendChild(selector);
     div.appendChild(crearTexto("h3","TICKET: "+r.numero));
 
     div.appendChild(crearTexto("p",
@@ -1094,7 +1147,12 @@ function mostrarTickets() {
       } catch(e) { alert("No se pudo eliminar: "+(e.message||e)); eliminar.disabled=false; }
     };
 
-    botones.append(editar,eliminar);
+    const pdfUno=document.createElement("button");
+    pdfUno.className="green";
+    pdfUno.textContent="PDF de este ticket";
+    pdfUno.onclick=()=>exportarPDF([r.id]);
+
+    botones.append(pdfUno,editar,eliminar);
     div.appendChild(botones);
     lista.appendChild(div);
   });
@@ -1268,89 +1326,87 @@ function fechaLegible(valor) {
   return partes.length===3 ? partes[2]+"/"+partes[1]+"/"+partes[0] : valor;
 }
 
-function generarReporteImpresion() {
+function generarReporteImpresion(tickets=registros) {
   const reporte=$("reporteImpresion");
-  const total=registros.reduce((s,r)=>s+(Number(r.dur)||0),0);
-  const tecnico=[...new Set(registros.map(r=>r.tecnico).filter(Boolean))].join(" / ") || "-";
-  const fechas=[...new Set(registros.map(r=>fechaLegible(r.fecha)).filter(Boolean))].join(" / ") || "-";
-  const areas=[...new Set(registros.map(r=>r.area).filter(Boolean))].join(" / ") || "-";
-
-  const filas=registros.map((r,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><b>${escaparHTML(r.numero||"-")}</b><div class="rep-detail">${escaparHTML(fechaLegible(r.fecha))}</div></td>
-      <td>${escaparHTML(r.area||"-")}</td>
-      <td>${escaparHTML(r.inicio||"-")}</td>
-      <td>${escaparHTML(r.fin||"-")}</td>
-      <td><b>${r.dur===null||r.dur===undefined?"Pendiente":escaparHTML(formato(Number(r.dur)||0))}</b></td>
-    </tr>
-    <tr><td colspan="6" class="rep-detail">
-      <b>Descripción del trabajo realizado:</b><br>${escaparHTML(r.descripcion||"No especificada")}<br>
-      <b>Ubicación inicial:</b> ${escaparHTML(r.direccionInicio||"No indicada")} ${r.coordenadasInicio ? "("+escaparHTML(r.coordenadasInicio)+")" : ""}<br>
-      <b>Ubicación final:</b> ${escaparHTML(r.direccionFin||"No indicada")} ${r.coordenadasFin ? "("+escaparHTML(r.coordenadasFin)+")" : ""}
-    </td></tr>
-    ${(r.fotoInicio||r.fotoFin) ? `<tr class="rep-photo-row"><td colspan="6"><div class="rep-photos">
-      ${r.fotoInicio ? `<div class="rep-photo"><b>FOTOGRAFÍA DE INICIO</b><img src="${escaparHTML(r.fotoInicio)}" alt="Fotografía de inicio del ticket ${escaparHTML(r.numero||'')}"></div>` : ""}
-      ${r.fotoFin ? `<div class="rep-photo"><b>FOTOGRAFÍA DE FINALIZACIÓN</b><img src="${escaparHTML(r.fotoFin)}" alt="Fotografía final del ticket ${escaparHTML(r.numero||'')}"></div>` : ""}
-    </div></td></tr>` : ""}` ).join("");
-
   const firmasHTML=[
     ["firmaTecnico","Técnico"],
     ["firmaAprobador","Aprobador 1"],
     ["firmaRRHH","Recursos Humanos"],
     ["firmaGerencia","Gerencia"]
   ].map(([id,label])=>`<div class="rep-sign">
-    ${firmas[id] ? `<img src="${firmas[id]}" alt="Firma ${label}">` : `<div style="height:59px"></div>`}
+    ${firmas[id] ? `<img src="${firmas[id]}" alt="Firma ${label}">` : `<div style="height:65px"></div>`}
     <div class="rep-line">${label}</div>
   </div>`).join("");
 
-  reporte.innerHTML=`
-    <div class="rep-header">
-      <div class="rep-brand">MOVILMAX<small>REGISTRO ADMINISTRATIVO</small></div>
-      <div class="rep-title">CONTROL DE HORAS EXTRAS<div class="rep-subtitle">REGISTRO DE ATENCIONES TÉCNICAS</div></div>
-    </div>
-    <section class="rep-section">
-      <h2>1. DATOS DEL PERSONAL Y DEL SERVICIO</h2>
-      <div class="rep-data">
-        <div class="rep-field"><b>TÉCNICO</b>${escaparHTML(tecnico)}</div>
-        <div class="rep-field"><b>FECHA(S) DE ATENCIÓN</b>${escaparHTML(fechas)}</div>
-        <div class="rep-field"><b>ÁREA / SERVICIO</b>${escaparHTML(areas)}</div>
-        <div class="rep-field"><b>CANTIDAD DE TICKETS</b>${registros.length}</div>
+  reporte.innerHTML=tickets.map((r,idx)=>{
+    const duracion=r.dur===null||r.dur===undefined?"Pendiente":formato(Number(r.dur)||0);
+    const fotos=(r.fotoInicio||r.fotoFin)?`<section class="rep-section">
+      <h2>3. EVIDENCIA FOTOGRÁFICA</h2>
+      <div class="rep-photos">
+        ${r.fotoInicio?`<div class="rep-photo"><b>FOTOGRAFÍA DE INICIO</b><img src="${escaparHTML(r.fotoInicio)}" alt="Fotografía de inicio"></div>`:`<div class="rep-photo"><b>FOTOGRAFÍA DE INICIO</b><div class="rep-empty">Sin fotografía</div></div>`}
+        ${r.fotoFin?`<div class="rep-photo"><b>FOTOGRAFÍA DE FINALIZACIÓN</b><img src="${escaparHTML(r.fotoFin)}" alt="Fotografía de finalización"></div>`:`<div class="rep-photo"><b>FOTOGRAFÍA DE FINALIZACIÓN</b><div class="rep-empty">Sin fotografía</div></div>`}
       </div>
-    </section>
-    <section class="rep-section">
-      <h2>2. DETALLE DE ATENCIONES</h2>
-      <table class="rep-table"><thead><tr><th>N.º</th><th>TICKET / FECHA</th><th>ÁREA</th><th>INICIO</th><th>FIN</th><th>DURACIÓN</th></tr></thead>
-      <tbody>${filas}</tbody></table>
-      <div class="rep-total">TOTAL ACUMULADO DE HORAS EXTRAS: ${escaparHTML(formato(total))}</div>
-    </section>
-    <section class="rep-section">
-      <h2>3. CONFORMIDAD Y APROBACIÓN</h2>
-      <p style="font-size:10px;line-height:1.5">Mediante las firmas correspondientes se deja constancia de la revisión y conformidad del registro de atenciones y del tiempo consignado en el presente documento.</p>
-      <div class="rep-signatures">${firmasHTML}</div>
-    </section>
-    <div class="rep-note">Documento generado para revisión, conformidad y aprobación interna · MOVILMAX</div>`;
+    </section>`:"";
+    return `<article class="rep-page">
+      <div class="rep-header">
+        <div class="rep-brand">MOVILMAX<small>REGISTRO ADMINISTRATIVO</small></div>
+        <div class="rep-title">CONTROL DE HORAS EXTRAS<div class="rep-subtitle">REPORTE INDIVIDUAL DE ATENCIÓN</div></div>
+      </div>
+      <section class="rep-section">
+        <h2>1. DATOS DEL PERSONAL Y DEL SERVICIO</h2>
+        <div class="rep-data">
+          <div class="rep-field"><b>TÉCNICO</b>${escaparHTML(r.tecnico||"-")}</div>
+          <div class="rep-field"><b>FECHA DE ATENCIÓN</b>${escaparHTML(fechaLegible(r.fecha))}</div>
+          <div class="rep-field"><b>ÁREA / SERVICIO</b>${escaparHTML(r.area||"-")}</div>
+          <div class="rep-field"><b>NÚMERO DE TICKET</b><strong>${escaparHTML(r.numero||"-")}</strong></div>
+        </div>
+      </section>
+      <section class="rep-section">
+        <h2>2. DETALLE DE LA ATENCIÓN</h2>
+        <table class="rep-table"><thead><tr><th>HORA DE INICIO</th><th>HORA DE FIN</th><th>DURACIÓN</th></tr></thead>
+        <tbody><tr><td>${escaparHTML(r.inicio||"-")}</td><td>${escaparHTML(r.fin||"-")}</td><td><b>${escaparHTML(duracion)}</b></td></tr></tbody></table>
+        <div class="rep-field"><b>DESCRIPCIÓN DEL TRABAJO REALIZADO</b><div class="rep-detail">${escaparHTML(r.descripcion||"No especificada")}</div></div>
+        <div class="rep-data">
+          <div class="rep-field"><b>UBICACIÓN INICIAL</b><div class="rep-detail">${escaparHTML(r.direccionInicio||"No indicada")}<br>${escaparHTML(r.coordenadasInicio||"")}</div></div>
+          <div class="rep-field"><b>UBICACIÓN FINAL</b><div class="rep-detail">${escaparHTML(r.direccionFin||"No indicada")}<br>${escaparHTML(r.coordenadasFin||"")}</div></div>
+        </div>
+      </section>
+      ${fotos}
+      <section class="rep-section">
+        <h2>4. CONFORMIDAD Y APROBACIÓN</h2>
+        <p style="font-size:10px;line-height:1.45">Mediante las firmas correspondientes se deja constancia de la revisión y conformidad del registro de atención y del tiempo consignado.</p>
+        <div class="rep-signatures">${firmasHTML}</div>
+      </section>
+      <div class="rep-note">Ticket ${escaparHTML(r.numero||"-")} · Documento ${idx+1} de ${tickets.length} · MOVILMAX</div>
+    </article>`;
+  }).join("");
 }
 
-async function exportarPDF() {
-  if (!registros.length) {
-    alert("Primero registra al menos un ticket.");
-    return;
-  }
+function seleccionarTodosTickets(estado) {
+  document.querySelectorAll(".ticket-pdf-check").forEach(c=>c.checked=!!estado);
+}
+
+function exportarPDFSeleccionados() {
+  const ids=[...document.querySelectorAll(".ticket-pdf-check:checked")].map(c=>c.value);
+  if(!ids.length) { alert("Selecciona al menos un ticket para generar el PDF."); return; }
+  exportarPDF(ids);
+}
+
+async function exportarPDF(ids=null) {
+  const tickets=ids ? registros.filter(r=>ids.includes(String(r.id))) : registros.slice();
+  if(!tickets.length) { alert("No hay tickets seleccionados para exportar."); return; }
   if(typeof html2canvas!=="function" || !window.jspdf?.jsPDF) {
-    alert("No se pudo cargar el generador PDF. Revisa tu conexión e inténtalo nuevamente.");
-    return;
+    alert("No se pudo cargar el generador PDF. Revisa tu conexión e inténtalo nuevamente."); return;
   }
-  const boton=$("btnDescargarPDF");
-  const textoOriginal=boton?.textContent||"Descargar PDF";
+  const boton=$("btnPDFSeleccionados");
+  const textoOriginal=boton?.textContent||"Descargar PDF seleccionados";
   if(boton){boton.disabled=true;boton.textContent="Generando PDF...";}
   const reporte=$("reporteImpresion");
   const estiloAnterior={display:reporte.style.display,position:reporte.style.position,left:reporte.style.left,top:reporte.style.top,width:reporte.style.width,minHeight:reporte.style.minHeight,padding:reporte.style.padding};
   try {
-    generarReporteImpresion();
+    generarReporteImpresion(tickets);
     reporte.classList.add("pdf-mode");
     reporte.setAttribute("aria-hidden","false");
-    // Espera a que las fotografías privadas de Supabase terminen de cargar.
     const imagenes=[...reporte.querySelectorAll("img")];
     await Promise.all(imagenes.map(img=>{
       if(img.complete && img.naturalWidth>0) return Promise.resolve();
@@ -1362,17 +1418,21 @@ async function exportarPDF() {
       });
     }));
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    const lienzo=await html2canvas(reporte,{scale:2,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false,windowWidth:850});
-    const imagen=lienzo.toDataURL("image/jpeg",0.92);
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
-    const anchoPagina=198,altoPagina=285;
-    const proporcion=Math.min(anchoPagina/lienzo.width,altoPagina/lienzo.height);
-    const ancho=lienzo.width*proporcion,alto=lienzo.height*proporcion;
-    const x=(210-ancho)/2,y=(297-alto)/2;
-    pdf.addImage(imagen,"JPEG",x,y,ancho,alto,undefined,"FAST");
-    const ticket=registros.length===1 ? (registros[0].numero||"ticket") : "resumen_"+registros.length+"_tickets";
-    const seguro=String(ticket).replace(/[^a-z0-9_-]+/gi,"_");
+    const paginas=[...reporte.querySelectorAll(".rep-page")];
+    for(let i=0;i<paginas.length;i++) {
+      const lienzo=await html2canvas(paginas[i],{scale:2,useCORS:true,allowTaint:false,backgroundColor:"#ffffff",logging:false,windowWidth:850});
+      const imagen=lienzo.toDataURL("image/jpeg",0.94);
+      const anchoPagina=198,altoPagina=280;
+      const proporcion=Math.min(anchoPagina/lienzo.width,altoPagina/lienzo.height);
+      const ancho=lienzo.width*proporcion,alto=lienzo.height*proporcion;
+      const x=(210-ancho)/2,y=(297-alto)/2;
+      if(i>0) pdf.addPage("a4","portrait");
+      pdf.addImage(imagen,"JPEG",x,y,ancho,alto,undefined,"FAST");
+    }
+    const nombre=tickets.length===1?(tickets[0].numero||"ticket"):"seleccion_"+tickets.length+"_tickets";
+    const seguro=String(nombre).replace(/[^a-z0-9_-]+/gi,"_");
     pdf.save("MOVILMAX_"+seguro+"_"+fechaHoy()+".pdf");
   } catch(e) {
     console.error("Error al generar PDF:",e);
@@ -1388,7 +1448,7 @@ async function exportarPDF() {
 /* IMPRESIÓN */
 
 window.addEventListener("beforeprint",()=>{
-  generarReporteImpresion();
+  generarReporteImpresion(registros);
 });
 
 /* BORRADO GENERAL */
